@@ -1,25 +1,16 @@
-# Frida — Dynamic Instrumentation & Android Exploration Report
+# Frida: Dynamic Tool Report
 
-![Frida](https://img.shields.io/badge/Frida-17.17.0-3F51B5?style=flat-square)
-![Type](https://img.shields.io/badge/Type-Dynamic%20Instrumentation-informational?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white)
-![Interface](https://img.shields.io/badge/Interface-CLI-black?style=flat-square)
+## Overview
 
----
+Frida is a dynamic instrumentation toolkit used to inspect and interact with applications while they are running. It is commonly used for reverse engineering, security testing, debugging, and runtime analysis.
 
-## 1. Overview
+I tried Frida 17.17.0 with an Android emulator to understand its architecture, deployment models, and practical process-access workflow.
 
-Frida is a **dynamic instrumentation toolkit** used to inspect and interact with applications while they are running. It is commonly used for reverse engineering, security testing, debugging, and runtime analysis.
+The practical work focused on setting up Frida Server, verifying communication with Android, enumerating processes, identifying the Moglog application, and investigating why attaching to the application failed.
 
-I explored Frida 17.17.0 with an Android emulator to understand its architecture, deployment models, and practical process-access workflow.
+## Frida Architecture
 
-My practical work focused on setting up Frida Server, verifying communication with Android, enumerating processes, identifying the Moglog application, and investigating an attachment failure.
-
----
-
-## 2. Frida Architecture
-
-The main components I studied are:
+The main components examined during the exploration were:
 
 ```text
 frida-tools
@@ -43,20 +34,18 @@ Native        Java/Android
 
 ### Components
 
-| Component | Role |
-|---|---|
-| **frida-tools** | Command-line interface such as `frida`, `frida-ps`, and `frida-trace` |
-| **frida-core** | Handles device communication, process access, sessions, and orchestration |
-| **Agent** | Frida code running inside the target process |
-| **frida-gum** | Low-level instrumentation engine for runtime/native instrumentation |
-| **frida-server** | Separate process that enables external access to target processes |
-| **Gadget** | Embedded Frida library that provides an alternative to external server-based access |
+|Component|Role|
+|-|-|
+|`frida-tools`|Provides command-line tools such as `frida`, `frida-ps`, and `frida-trace`.|
+|`frida-core`|Handles device communication, process access, sessions, and instrumentation orchestration.|
+|Agent|Frida code that runs inside the target process.|
+|`frida-gum`|Provides the low-level engine for native and runtime instrumentation.|
+|`frida-server`|Runs as a separate process on the Android device and enables external access to target processes.|
+|Gadget|An embedded Frida library that provides an alternative to external server-based access.|
 
----
+## Server and Gadget
 
-## 3. Server vs Gadget
-
-The two deployment models I studied are:
+Frida supports two main deployment models:
 
 ```text
 Server model:
@@ -71,105 +60,85 @@ Target Application
        └── Frida Gadget
 ```
 
-**frida-server** runs separately on the Android device and allows Frida to access target processes externally.
+`frida-server` runs separately on the Android device and allows Frida to access target processes from the host computer.
 
-**Gadget** is loaded inside the target application. It is useful when external process attachment is restricted or when embedded instrumentation is required.
+Gadget is loaded inside the target application. It can be useful when external process attachment is restricted or when instrumentation needs to be embedded directly into the application.
 
-Gadget is an alternative deployment mechanism; it does not replace `frida-gum`.
+Gadget is an alternative deployment mechanism. It does not replace `frida-gum`, which remains part of Frida's underlying instrumentation architecture.
 
----
+## Frida Setup
 
-## 4. Practical Environment
-
-| Component | Value |
-|---|---|
-| Frida | 17.17.0 |
-| Android | 16 |
-| SDK | 36 |
-| Emulator ABI | x86_64 |
-| Target | Moglog |
-| Package | `com.skech.moglog` |
-| Host | Windows |
-
----
-
-## 5. Frida Setup
-
-I installed the Frida CLI tools with:
+I installed the Frida command-line tools using:
 
 ```bash
 pip install frida-tools
 ```
 
-I verified the installation:
+The installation was verified with:
 
 ```bash
 frida --version
 ```
 
-Result:
+The reported version was:
 
 ```text
 17.17.0
 ```
 
-I verified the Android connection:
+I then checked the Android connection using:
 
 ```bash
 adb devices
 ```
 
-The emulator was available as:
+The emulator appeared as:
 
 ```text
 emulator-5554    device
 ```
 
-I confirmed the emulator architecture:
+The emulator architecture was checked with:
 
 ```bash
 adb shell getprop ro.product.cpu.abi
 ```
 
-Result:
+The result was:
 
 ```text
-x86_64
+x86\_64
 ```
 
----
+## Frida Server Setup
 
-## 6. Frida Server Setup
-
-I pushed the matching Frida Server to the emulator:
+I pushed the matching Frida Server binary to the emulator with:
 
 ```bash
 adb push frida-server /data/local/tmp/frida-server
 ```
 
-Then I made it executable:
+I then made the file executable:
 
 ```bash
 adb shell chmod 755 /data/local/tmp/frida-server
 ```
 
-I started it with:
+The server was started using:
 
 ```bash
 adb shell /data/local/tmp/frida-server
 ```
 
-Although an SELinux permission message was displayed, I verified that the server remained running using:
+An SELinux permission message was displayed during setup, but I confirmed that the server continued running with:
 
 ```bash
 adb shell ps -A | findstr frida
 ```
 
----
+## Verifying Communication
 
-## 7. Verifying Frida Communication
-
-I used:
+I used the following command to list processes visible to Frida:
 
 ```bash
 frida-ps -U
@@ -177,29 +146,19 @@ frida-ps -U
 
 Frida successfully enumerated Android processes, including system and application processes.
 
-This confirmed that:
+This confirmed that communication between the host computer, Frida, and the Android emulator was working.
 
-```text
-PC
- ↓
-Frida
- ↓
-Android Emulator
-```
 
-communication was working.
 
----
+## Moglog Process Exploration
 
-## 8. Moglog Process Exploration
-
-I verified the Moglog package:
+I verified that the Moglog package was installed with:
 
 ```bash
 adb shell pm list packages | findstr moglog
 ```
 
-Result:
+The result was:
 
 ```text
 package:com.skech.moglog
@@ -211,7 +170,7 @@ After launching Moglog, I used:
 frida-ps -U -a
 ```
 
-Moglog appeared as:
+The application appeared as:
 
 ```text
 6687  Moglog  com.skech.moglog
@@ -219,17 +178,15 @@ Moglog appeared as:
 
 This confirmed that Frida could identify the running application.
 
----
+## Attachment Attempt
 
-## 9. Attachment Attempt
-
-I attempted to attach by name:
+I attempted to attach to Moglog by name:
 
 ```bash
 frida -U -n Moglog
 ```
 
-and by PID:
+I also attempted to attach using its PID:
 
 ```bash
 frida -U -p 6687
@@ -241,45 +198,43 @@ Both attempts returned:
 Failed to attach: unable to access process with pid 6687
 ```
 
-I verified that the PID was valid using:
+To confirm that the PID was still valid, I ran:
 
 ```bash
 adb shell pidof com.skech.moglog
 ```
 
-which returned:
+The command returned:
 
 ```text
 6687
 ```
 
-Therefore, the failure was not caused by an incorrect or stale PID.
+This showed that the failure was not caused by an incorrect or stale PID.
 
----
+## Environment
 
-## 10. Environment Investigation
-
-I checked the Android build:
+I tried the Android build type with:
 
 ```bash
 adb shell getprop ro.build.type
 ```
 
-Result:
+The result was:
 
 ```text
 user
 ```
 
-ADB root access was unavailable on this build.
+ADB root access was not available on this build.
 
-I also checked Moglog's package configuration and confirmed that it was **debuggable**:
+I also checked Moglog's package configuration and confirmed that the application was debuggable:
 
 ```text
 DEBUGGABLE
 ```
 
-Its application UID was:
+The application UID was:
 
 ```text
 uid=10220
@@ -291,68 +246,39 @@ Frida Server was running under the Android `shell` UID:
 uid=2000(shell)
 ```
 
-I also verified:
+I also verified access through `run-as`:
 
 ```bash
 adb shell run-as com.skech.moglog id
 ```
 
-which successfully returned the Moglog application identity.
+This command successfully returned the Moglog application identity.
 
-These checks helped establish that the attachment problem was related to the process-access environment rather than process discovery.
+These checks indicated that the attachment problem was related to the process-access environment rather than process discovery. In particular, being able to enumerate a process does not necessarily mean that the current Android security context permits Frida to attach to it.
 
----
+## Results
 
-## 11. Results
+|Activity|Result|
+|-|-|
+|Frida installation|Successful|
+|Frida version verification|Successful|
+|Android connection|Successful|
+|Frida Server setup|Successful|
+|Frida process enumeration|Successful|
+|Moglog identification|Successful|
+|Moglog PID verification|Successful|
+|Direct process attachment|Unsuccessful|
+|Moglog debuggable status|Confirmed|
+|`run-as` access|Successful|
+|Gadget study|Theoretical|
 
-| Activity | Result |
-|---|---|
-| Frida installation | Successful |
-| Frida version verification | Successful |
-| Android connection | Successful |
-| Frida Server setup | Successful |
-| Frida process enumeration | Successful |
-| Moglog identification | Successful |
-| Moglog PID verification | Successful |
-| Direct process attachment | Unsuccessful |
-| Moglog debuggable status | Confirmed |
-| `run-as` access | Successful |
-| Gadget study | Theoretical |
-
-I did **not** record successful hooks or runtime method interception during this exploration.
-
----
-
-## 12. Key Takeaways
-
-- Frida provides runtime instrumentation rather than static APK analysis.
-- `frida-tools` provides the CLI.
-- `frida-core` manages communication and process sessions.
-- The Agent operates inside the target process.
-- `frida-gum` provides the underlying instrumentation capabilities.
-- `frida-server` enables external process access.
-- Gadget provides an embedded alternative.
-- Android permissions and process identity can affect Frida attachment.
-- Process enumeration does not guarantee successful instrumentation.
-
----
-
-## 13. Conclusion
-
-I successfully set up Frida 17.17.0 with an Android emulator and verified communication between Frida and Android. I was able to enumerate processes and identify the Moglog application.
-
-Direct attachment to Moglog was unsuccessful in the given Android user-build environment. I investigated the process ID, application UID, Frida Server UID, debuggable status, and root availability to understand the limitation.
-
-I also studied Frida Gadget as an alternative deployment model for environments where external process attachment is restricted.
-
-Overall, this exploration gave me a practical understanding of **Frida's architecture, Android deployment, process discovery, and the factors affecting runtime instrumentation**.
-
----
+No successful hooks or runtime method interceptions were recorded during this exploration.
 
 ## References
 
-- [Frida Documentation](https://frida.re/docs/home/)
-- [Frida Android Documentation](https://frida.re/docs/android/)
-- [Frida Installation](https://frida.re/docs/installation/)
-- [Frida Modes](https://frida.re/docs/modes/)
-- [Frida Gadget](https://frida.re/docs/gadget/)
+* [Frida Documentation](https://frida.re/docs/home/)
+* [Frida Android Documentation](https://frida.re/docs/android/)
+* [Frida Installation](https://frida.re/docs/installation/)
+* [Frida Modes](https://frida.re/docs/modes/)
+* [Frida Gadget](https://frida.re/docs/gadget/)
+
