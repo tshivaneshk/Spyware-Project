@@ -1,63 +1,33 @@
-# Androguard — Android Static Analysis Tool Exploration Report
-
-![Androguard](https://img.shields.io/badge/Androguard-4.1.4-3776AB?style=flat-square)
-![Type](https://img.shields.io/badge/Type-Android%20Static%20Analysis-informational?style=flat-square)
-![Language](https://img.shields.io/badge/Language-Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![Target](https://img.shields.io/badge/Target-Android%20APK-3DDC84?style=flat-square&logo=android&logoColor=white)
-![Analysis](https://img.shields.io/badge/Analysis-DEX%20%7C%20AXML%20%7C%20XREF-black?style=flat-square)
-
----
-
-## 1. Executive Summary
-
-I explored **Androguard 4.1.4** to understand its capabilities as an Android static-analysis and reverse-engineering framework.
-
-My practical work focused on analyzing the **Moglog Android APK** and examining the information that Androguard can extract from a compiled application. I studied the APK/AXML and DEX structures, inspected classes and methods, examined application-related components, and used cross-reference (XREF) information to understand relationships between code elements.
-
-The exploration demonstrated that Androguard is useful for moving from basic APK information to a structured view of an application's classes, methods, libraries, and code relationships.
-
----
-
-## 2. Objective
-
-The objectives of my exploration were to:
-
-- Understand what Androguard is and where it is useful.
-- Understand how Androguard processes an Android APK.
-- Examine Android Manifest/AXML information.
-- Inspect DEX files, classes, methods, fields, and strings.
-- Understand the purpose of the `core/analysis` component.
-- Explore XREF relationships between methods and classes.
-- Identify application-specific components and third-party frameworks.
-- Understand the practical value and limitations of static analysis.
-
----
-
-## 3. Tool Overview
-
-**Androguard** is a Python-based framework for analyzing and reverse engineering Android applications.
-
-An APK contains compiled application code and Android-specific structures. Androguard parses these structures and exposes them through Python objects and analysis APIs.
-
-The areas I explored were:
-
-- APK parsing
-- Android Binary XML (AXML) parsing
-- DEX parsing
-- Class and method analysis
-- Fields and strings
-- Cross-reference (XREF) analysis
-- Application structure identification
-- Relationships between code elements
-
-Although Androguard provides additional capabilities such as disassembly and decompilation, my practical exploration was focused on static structural analysis and XREF relationships.
-
----
-
-## 4. Analysis Workflow
-
-My exploration followed this workflow:
-
+Androguard: Android Static Analysis Tool Report
+Executive Summary
+I explored Androguard 4.1.4 to understand how it can be used for Android static analysis and reverse engineering.
+For the understanding, I analyzed the Moglog (Show tracking application I developed) Android APK. I examined its APK and Android Binary XML (AXML) structures, inspected DEX files, reviewed classes and methods, identified application components and third-party libraries, and used cross-reference information to understand relationships between code elements.
+The results showed that Androguard is useful for moving from basic APK information to a more structured understanding of an application's code, architecture, and dependencies.
+Objectives
+The main objectives were to:
+Understand what Androguard is and where it can be used.
+Learn how Androguard processes an Android APK.
+Examine Android Manifest information through AXML parsing.
+Inspect DEX files, classes, methods, fields, and strings.
+Understand the purpose of the `core/analysis` component.
+Explore cross-reference (XREF) relationships between methods and classes.
+Identify application-specific components and third-party frameworks.
+Understand the practical value and limitations of static analysis.
+Tool Overview
+Androguard is a Python-based framework for analyzing and reverse engineering Android applications.
+An APK contains compiled application code and Android-specific resources. Androguard parses these structures and makes them available through Python objects and analysis APIs.
+The main areas I went throgh were:
+APK parsing.
+Android Binary XML (AXML) parsing.
+DEX parsing.
+Class and method analysis.
+Fields and strings.
+Cross-reference analysis.
+Application structure identification.
+Relationships between code elements.
+Androguard also supports capabilities such as disassembly and decompilation. However, this study focused mainly on structural analysis and XREF relationships.
+Analysis Workflow
+The exploration followed this general workflow:
 ```text
 Android APK
      |
@@ -79,96 +49,61 @@ XREF Relationships
      v
 Application Structure
 ```
-
-The APK analyzed during the exploration belonged to:
-
+The APK analyzed during the exploration belonged to the following package:
 ```text
 com.skech.moglog
 ```
-
----
-
-## 5. APK and AXML Analysis
-
-### 5.1 APK Structure
-
-An APK is the packaged form of an Android application. Important components include:
-
+APK and AXML Analysis
+APK Structure
+An APK is the packaged form of an Android application. It commonly contains files and directories such as:
 ```text
 AndroidManifest.xml
 classes.dex
 resources
 other application files
 ```
-
-Androguard provides programmatic access to these components.
-
-### 5.2 Android Binary XML (AXML)
-
-The `AndroidManifest.xml` inside an APK is stored using Android Binary XML (AXML).
-
-Androguard parses this representation so that Manifest information can be inspected.
-
-Manifest information can reveal:
-
-- Package information
-- Application components
-- Permissions
-- SDK information
-- Activities
-- Services
-- Broadcast receivers
-- Content providers
-
-This makes AXML analysis useful for understanding the declared structure of an Android application.
-
----
-
-## 6. DEX Analysis
-
-Android application code is commonly stored in **DEX (Dalvik Executable)** files.
-
-During my exploration, Androguard reported information for a DEX file including:
-
+Androguard provides programmatic access to these components, making it possible to inspect the internal structure of an APK without manually unpacking and examining every file.
+Android Binary XML
+The `AndroidManifest.xml` file inside an APK is stored in Android Binary XML (AXML) format rather than ordinary readable XML.
+Androguard can parse this format and expose useful Manifest information, including:
+Package information.
+Application components.
+Permissions.
+SDK information.
+Activities.
+Services.
+Broadcast receivers.
+Content providers.
+This makes AXML analysis useful for understanding the declared structure and capabilities of an Android application.
+DEX Analysis
+Android application code is commonly stored in DEX (Dalvik Executable) files.
+During the exploration, Androguard reported the following information for one DEX file:
 ```text
 DEX #13
 Classes: 9130
 Methods: 64614
 Strings: 84354
 ```
-
 The overall analysis reported:
-
 ```text
 Total classes: 27853
 Total analyzed methods: 196824
 ```
-
-These figures indicate that the APK contained a large amount of compiled code, including application code and packaged libraries/frameworks.
-
-From the DEX analysis, I was able to inspect:
-
-- Classes
-- Methods
-- Fields
-- Strings
-- Code-related information
-- Relationships between code elements
-
----
-
-## 7. `core/analysis` and XREF Analysis
-
-One of the important areas I examined was:
-
+These figures show that the APK contained a large amount of compiled code. This included both application-specific code and code from packaged libraries and frameworks.
+The DEX analysis made it possible to inspect:
+Classes.
+Methods.
+Fields.
+Strings.
+Code-related information.
+Relationships between code elements.
+The Analysis Layer and XREFs
+One of the most important areas examined was:
 ```text
 androguard/core/analysis/
 ```
-
-The analysis layer provides a higher-level representation of relationships within the parsed DEX information.
-
-The distinction is important:
-
+The analysis layer provides a higher-level view of the relationships within the parsed DEX data.
+The distinction between parsing and analysis can be described as follows:
 ```text
 DEX Parser
     |
@@ -186,45 +121,22 @@ Analysis Layer
     v
 XREF Information
 ```
-
-### XREF
-
-XREF means **cross-reference**.
-
-XREF information can show relationships such as:
-
-- Methods referencing other methods
-- Methods referenced by other methods
-- Classes connected through methods
-- References to fields or other code elements
-
-This changes the investigation from:
-
+Cross-References
+XREF stands for cross-reference. XREF information describes how different code elements are connected.
+It can help identify relationships such as:
+Methods that reference other methods.
+Methods referenced by other methods.
+Classes connected through method calls.
+References to fields and other code elements.
+This changes the investigation from simply asking:
 > What methods are present?
-
-to:
-
+to asking:
 > How are those methods connected?
-
-That relationship information was one of the most useful parts of my exploration.
-
----
-
-## 8. Findings from the Moglog APK
-
-### 8.1 Application Components
-
-The analysis output contained recognizable components associated with:
-
-- ViewModels
-- Repositories
-- Models
-- Cloud/data handling
-- Dependency injection
-- UI/framework code
-
-Examples included:
-
+That shift was one of the most useful parts of the exploration because it helped provide context around individual classes and methods.
+Findings from the Moglog APK
+Application Components
+The analysis output contained recognizable components associated with ViewModels, repositories, models, cloud or data handling, dependency injection, and user-interface frameworks.
+Some examples included:
 ```text
 WatchViewModel
 ShortcutRepository
@@ -232,67 +144,46 @@ CloudSyncRepository
 ApiKeyManager
 DramaRepository
 ```
-
-These names helped me identify the general organization of the application from its compiled code.
-
-### 8.2 Cloud Synchronization
-
-I identified:
-
+These names provided clues about the general organization of the application and helped distinguish likely application logic from framework code.
+Cloud Synchronization
+The analysis identified the following methods and class:
 ```text
 CloudSyncRepository
     fetchFromCloud(...)
     syncToCloud(...)
 ```
-
 and:
-
 ```text
 CloudData
     getApiKey()
     getDramas()
 ```
-
-These results indicated code associated with cloud synchronization and cloud data handling.
-
-### 8.3 API-Key Related Code
-
-I identified:
-
+These results suggested the presence of functionality related to cloud synchronization and cloud-hosted application data.
+API-Key-Related Code
+The analysis also identified an `ApiKeyManager` class with methods such as:
 ```text
 ApiKeyManager
     getApiKey()
     getSyncFrequency()
 ```
-
-This provided a useful starting point for examining API-key-related functionality.
-
-The presence of an API-key-related method alone does **not** establish a security vulnerability. It only identifies code that would require further investigation.
-
-### 8.4 Application Logic
-
+This provided a useful starting point for further investigation into how API keys are obtained, stored, and used.
+However, the presence of an API-key-related method does not by itself indicate a security vulnerability. It only identifies an area that may require additional analysis.
+Application Logic
 The analysis contained methods such as:
-
 ```text
 WatchViewModel->saveShortcut(...)
 DramaRepository->saveDrama(...)
 ```
-
-It also contained model methods such as:
-
+It also identified model methods including:
 ```text
 Drama->getId()
 Drama->getStatus()
 Drama->getCompletedAt()
 Drama->getAddedAt()
 ```
-
-These results helped identify application data handling and business-logic areas.
-
-### 8.5 Frameworks and Libraries
-
-The output also contained references to:
-
+These results helped reveal parts of the application's business logic and data-handling structure.
+Frameworks and Libraries
+The output also contained references to several common Android and Kotlin technologies, including:
 ```text
 Kotlin
 AndroidX
@@ -302,88 +193,35 @@ Kotlin Coroutines / Flow
 Dagger / Hilt
 Firebase
 ```
-
-This helped distinguish application-specific code from framework and library code.
-
----
-
-## 9. Practical Value
-
-The information obtained from Androguard can support several stages of Android analysis:
-
-| Area | Information obtained |
-|---|---|
-| Application identification | Package and APK information |
-| Manifest analysis | Components, permissions, SDK information |
-| Code discovery | Classes and methods |
-| Data discovery | Fields and strings |
-| Code relationships | XREF information |
-| Architecture understanding | ViewModels, repositories, models |
-| Technology identification | Framework and library classes |
-| Investigation starting points | Security- or functionality-related code |
-
-The main practical value I observed was the ability to trace relationships between code elements instead of only viewing isolated class and method names.
-
----
-
-## 10. Limitations and Considerations
-
-### Static Analysis Does Not Prove Runtime Execution
-
-The presence of a method in an APK does not prove that it executes during normal application use.
-
-### Large Analysis Output
-
-The APK produced:
-
+Identifying these technologies was useful for separating application-specific code from third-party libraries, generated code, and framework components.
+Practical Value
+The information obtained from Androguard can support several stages of Android application analysis:
+Area	Information obtained
+Application identification	Package and APK information
+Manifest analysis	Components, permissions, and SDK information
+Code discovery	Classes and methods
+Data discovery	Fields and strings
+Code relationships	XREF information
+Architecture understanding	ViewModels, repositories, and models
+Technology identification	Framework and library classes
+Investigation planning	Security- or functionality-related code locations
+The main practical value observed was the ability to trace relationships between code elements rather than viewing class and method names in isolation.
+Limitations
+Static Analysis Does Not Prove Runtime Execution
+The presence of a method in an APK does not prove that the method executes during normal application use. Runtime behavior may depend on user actions, configuration, permissions, network responses, or other conditions.
+Large Analysis Output
+The APK produced the following results:
 ```text
 27,853 classes
 196,824 analyzed methods
 ```
-
-This makes manual inspection impractical without filtering and targeted investigation.
-
-### Generated and Framework Code
-
-Kotlin, Jetpack Compose, AndroidX, and other libraries contributed significant amounts of code. This means application-specific logic must be distinguished from generated and third-party code.
-
-### Obfuscation
-
-Obfuscation can make classes and methods difficult to understand by replacing meaningful names with short or meaningless identifiers.
-
-### Interpretation Is Required
-
-Androguard provides structured analysis information, but the analyst must interpret it correctly. A discovered class or method should not automatically be treated as a vulnerability or security finding.
-
----
-
-## 11. Key Takeaways
-
-From this exploration, I learned that:
-
-1. Androguard can programmatically parse Android APK structures.
-2. AXML analysis provides access to Android Manifest information.
-3. DEX analysis exposes classes, methods, fields, and strings.
-4. The analysis layer provides relationships between code elements.
-5. XREF information is particularly useful for tracing application logic.
-6. Large applications require targeted filtering and investigation.
-7. Static-analysis observations require additional evidence before being treated as security findings.
-
----
-
-## 12. Conclusion
-
-My exploration showed that Androguard is a useful **programmable static-analysis framework for Android applications**.
-
-The most valuable capability I observed was its ability to combine parsed DEX information with XREF relationships. This allowed me to move beyond identifying what classes and methods exist and begin understanding how different parts of the application are connected.
-
-Using the Moglog APK, I identified application components such as ViewModels, repositories, models, cloud-related classes, and framework dependencies. The analysis provided a structured starting point for further Android reverse engineering and security investigation.
-
-Overall, Androguard provided a practical way to inspect the internal structure of a compiled Android application and understand relationships within its codebase.
-
----
-
-## References
-
-- [Androguard GitHub](https://github.com/androguard/androguard)
-- [Androguard Documentation](https://androguard.readthedocs.io/)
+With this much code, manually reviewing every class and method would be impractical. Filtering, searching, and targeted investigation are necessary.
+Generated and Framework Code
+Kotlin, Jetpack Compose, AndroidX, Firebase, and other libraries contributed significant amounts of code. As a result, application-specific logic must be separated from generated code and third-party components.
+Obfuscation
+Obfuscation can make classes and methods difficult to understand by replacing meaningful names with short or unclear identifiers. This can limit the usefulness of name-based searches and require analysis of method behavior and relationships instead.
+Interpretation Is Required
+Androguard provides structured information, but the analyst still needs to interpret the results correctly. A discovered class, method, string, or permission should not automatically be treated as a vulnerability or security finding.
+References
+Androguard GitHub
+Androguard Documentation
