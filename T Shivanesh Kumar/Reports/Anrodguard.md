@@ -1,4 +1,4 @@
-Androguard: Android Static Analysis Tool Report
+**Androguard: Android Static Analysis Tool Report**
 Executive Summary
 I explored Androguard 4.1.4 to understand how it can be used for Android static analysis and reverse engineering.
 For the understanding, I analyzed the Moglog (Show tracking application I developed) Android APK. I examined its APK and Android Binary XML (AXML) structures, inspected DEX files, reviewed classes and methods, identified application components and third-party libraries, and used cross-reference information to understand relationships between code elements.
