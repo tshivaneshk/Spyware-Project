@@ -1,21 +1,19 @@
-**Androguard: Android Static Analysis Tool Report**
+Androguard: Android Static Analysis Tool Report
 Executive Summary
 I explored Androguard 4.1.4 to understand how it can be used for Android static analysis and reverse engineering.
 For the understanding, I analyzed the Moglog (Show tracking application I developed) Android APK. I examined its APK and Android Binary XML (AXML) structures, inspected DEX files, reviewed classes and methods, identified application components and third-party libraries, and used cross-reference information to understand relationships between code elements.
 The results showed that Androguard is useful for moving from basic APK information to a more structured understanding of an application's code, architecture, and dependencies.
 Objectives
-The main objectives were to:
+The objectives were:
 Understand what Androguard is and where it can be used.
 Learn how Androguard processes an Android APK.
 Examine Android Manifest information through AXML parsing.
 Inspect DEX files, classes, methods, fields, and strings.
-Understand the purpose of the `core/analysis` component.
 Explore cross-reference (XREF) relationships between methods and classes.
-Identify application-specific components and third-party frameworks.
-Understand the practical value and limitations of static analysis.
+Understand limitations of static analysis.
 Tool Overview
 Androguard is a Python-based framework for analyzing and reverse engineering Android applications.
-An APK contains compiled application code and Android-specific resources. Androguard parses these structures and makes them available through Python objects and analysis APIs.
+An APK has compiled application code and Android-specific resources. Androguard parses these structures and makes them available through Python objects and analysis APIs.
 The main areas I went throgh were:
 APK parsing.
 Android Binary XML (AXML) parsing.
@@ -62,7 +60,7 @@ classes.dex
 resources
 other application files
 ```
-Androguard provides programmatic access to these components, making it possible to inspect the internal structure of an APK without manually unpacking and examining every file.
+Androguard provided programmatic access to these components, making it possible to inspect the internal structure of an APK.
 Android Binary XML
 The `AndroidManifest.xml` file inside an APK is stored in Android Binary XML (AXML) format rather than ordinary readable XML.
 Androguard can parse this format and expose useful Manifest information, including:
@@ -128,11 +126,7 @@ Methods that reference other methods.
 Methods referenced by other methods.
 Classes connected through method calls.
 References to fields and other code elements.
-This changes the investigation from simply asking:
-> What methods are present?
-to asking:
-> How are those methods connected?
-That shift was one of the most useful parts of the exploration because it helped provide context around individual classes and methods.
+It helped to provide context around individual classes and methods.
 Findings from the Moglog APK
 Application Components
 The analysis output contained recognizable components associated with ViewModels, repositories, models, cloud or data handling, dependency injection, and user-interface frameworks.
@@ -144,7 +138,7 @@ CloudSyncRepository
 ApiKeyManager
 DramaRepository
 ```
-These names provided clues about the general organization of the application and helped distinguish likely application logic from framework code.
+These names provided info about the general organization of the application and helped distinguish likely application logic from framework code.
 Cloud Synchronization
 The analysis identified the following methods and class:
 ```text
@@ -181,7 +175,7 @@ Drama->getStatus()
 Drama->getCompletedAt()
 Drama->getAddedAt()
 ```
-These results helped reveal parts of the application's business logic and data-handling structure.
+These results helped to know application's business logic and data-handling structure.
 Frameworks and Libraries
 The output also contained references to several common Android and Kotlin technologies, including:
 ```text
