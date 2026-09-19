@@ -1,9 +1,7 @@
-<div align="center">
+# MVT — Mobile Verification Toolkit 🔍
 
-# MVT — Mobile Verification Toolkit
-### Technical Review & Architecture Report
-
-_Open-source forensic toolkit for detecting mobile spyware compromise_
+**Cyber Forensics & Spyware Compromise Detection Toolkit**
+Built for civil-society investigators, journalists, and technologists analyzing suspected spyware targeting.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MVT%20(MPL%202.0%20Modified)-informational?style=flat-square)
@@ -11,39 +9,45 @@ _Open-source forensic toolkit for detecting mobile spyware compromise_
 ![Interface](https://img.shields.io/badge/Interface-CLI-black?style=flat-square)
 ![Maintainer](https://img.shields.io/badge/Maintained%20by-Amnesty%20International%20Security%20Lab-red?style=flat-square)
 
-[Overview](#overview) • [Features](#features) • [Tech Stack](#tech-stack) • [Architecture](#architecture) • [Setup & Installation](#setup--installation) • [Usage](#usage) • [Project Structure](#project-structure) • [Privacy & Ethics](#privacy--ethics) • [Limitations & Roadmap](#limitations--roadmap) • [Contributing](#contributing) • [License](#license)
+---
 
-</div>
+## ⚠️ Privacy & Ethics
+
+MVT is released under a **modified Mozilla Public License 2.0**, which adds a **Consensual Use Restriction** clause. It is intended **exclusively for examining a device the user owns or is explicitly authorized to examine** — non-consensual, adversarial forensic use is prohibited by license.
+
+Public Indicators of Compromise (IOCs) alone are **not sufficient to certify a device as "clean."** A scan returning no matches means no *known* spyware indicator was found — it does not rule out an undocumented or novel threat.
 
 ---
 
-## Overview
+## What It Does
 
-**MVT (Mobile Verification Toolkit)** is a command-line forensic toolkit released by the **Amnesty International Security Lab** in July 2021, developed in the context of the **Pegasus Project** investigation. It is designed to help technologists, investigators, and civil-society organizations determine whether a mobile device shows signs of compromise by known commercial spyware.
+MVT never touches a live phone invasively — it never exploits, roots, or jailbreaks a device. Instead:
 
-MVT does not exploit, root, or jailbreak a device. Instead, it analyzes forensic artifacts that have **already been extracted** through standard, non-invasive methods — an Android ADB backup/bugreport, or an iOS iTunes backup, filesystem dump, or sysdiagnose bundle — and cross-references them against published Indicators of Compromise (IOCs) for known spyware campaigns.
-
-This document is a technical review of MVT's architecture, capabilities, and limitations, produced for academic/project evaluation purposes.
+1. Someone extracts device data through **standard, built-in methods** — an Android ADB backup/bugreport, or an iOS iTunes backup, full filesystem dump, or Apple sysdiagnose bundle
+2. MVT **reads that already-extracted data** (SQLite databases, plists, logs, config files) — the same way any script reads a file
+3. Every parsed artifact (URLs, process names, file paths, domains) is **checked against known-bad indicators** published by threat-intel researchers (Amnesty, Citizen Lab, etc.) in the STIX2 format
+4. Any match is raised as an **alert**, and everything is placed on a unified **timeline** for manual review
+5. Findings are exported as a structured **JSON report**
 
 ---
 
 ## Features
 
-- Parses and normalizes forensic artifacts from **Android** (ADB backup, bugreport, AndroidQF collections) and **iOS** (iTunes backup, full filesystem dump, sysdiagnose)
-- Matches extracted data (URLs, domains, process names, file paths) against **STIX2-format IOC feeds** using a high-performance multi-pattern matching engine
-- Detects known spyware persistence techniques — malicious configuration profiles (iOS), Accessibility Service abuse (Android), suspicious background receivers and processes
-- Generates a unified, chronological **timeline** of device activity for manual correlation
-- Supports encrypted iOS backup decryption when the backup password is known
-- Extensible **plugin architecture** — new artifact parsers can be added without modifying the core engine
-- Optional VirusTotal integration for secondary hash/URL reputation checks
-- Fully open-source and auditable — every detection decision can be traced back to source
+- 📱 **Dual-platform support** — dedicated module families for both Android and iOS
+- 🧬 **STIX2 IOC matching** — cross-references extracted artifacts against published spyware indicator feeds
+- 🕵️ **Persistence-technique detection** — malicious iOS configuration profiles, Android Accessibility Service abuse, suspicious background receivers
+- 🕒 **Unified timeline** — chronological view of all extracted events across every module
+- 🔓 **Encrypted backup handling** — decrypts password-protected iOS backups when the password is known
+- 🧩 **Plugin architecture** — new artifact parsers can be added without touching the core engine
+- 🔍 **VirusTotal integration** — optional secondary hash/URL reputation lookups
+- 🔎 **Fully auditable** — open-source; every detection decision traces back to readable source code
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology | Purpose |
-|---|---|---|
+|-------|-----------|---------|
 | Core language | Python 3.10+ | Orchestration, parsing, CLI |
 | CLI framework | Click 8.4 | Command structure (`mvt-ios`, `mvt-android`) |
 | Terminal output | Rich 15.0 | Formatted tables, progress bars |
@@ -62,13 +66,13 @@ This document is a technical review of MVT's architecture, capabilities, and lim
 
 ```
                  ┌────────────────────────────┐        ┌────────────────────────────┐
-                 │   Android acquisition       │        │    iOS acquisition          │
+                 │   Android acquisition       │        │    iOS acquisition           │
                  │  bugreport · backup · qf    │        │ backup · filesystem · sysdiag│
                  └──────────────┬─────────────┘        └──────────────┬─────────────┘
                                 │  raw extracted files                │
                                 ▼                                     ▼
                  ┌────────────────────────────┐        ┌────────────────────────────┐
-                 │     Android modules         │        │       iOS modules           │
+                 │     Android modules         │        │       iOS modules            │
                  │  dumpsys artifact parsers   │        │  mixed / fs / backup parsers │
                  └──────────────┬─────────────┘        └──────────────┬─────────────┘
                                 │  structured results                 │
@@ -81,14 +85,14 @@ This document is a technical review of MVT's architecture, capabilities, and lim
                                └───────────────┬─────────────┘
                                                 ▼
                                ┌─────────────────────────────┐
-                               │  Indicators engine           │
+                               │  Indicators engine            │
                                │  (Aho-Corasick automaton      │
-                               │   vs. STIX2 IOC feeds)        │
+                               │   vs. STIX2 IOC feeds)         │
                                └───────────────┬─────────────┘
                                                 ▼
                                ┌─────────────────────────────┐
                                │  Alerts · Timeline · JSON     │
-                               │  report output                │
+                               │  report output                 │
                                └─────────────────────────────┘
 ```
 
@@ -96,7 +100,7 @@ This document is a technical review of MVT's architecture, capabilities, and lim
 
 ---
 
-## Setup & Installation
+## Installation & Setup
 
 ```bash
 # Install from PyPI
@@ -111,7 +115,7 @@ pip3 install .
 docker build -t mvt .
 ```
 
-> MVT officially supports Linux and macOS. Windows users are directed to the Docker image, as native Windows support is not provided.
+> MVT officially supports Linux and macOS. Windows users are directed to the Docker image.
 
 ---
 
@@ -155,38 +159,16 @@ mvt/
 
 ---
 
-## Privacy & Ethics
+## Why This Architecture
 
-MVT is released under a **modified Mozilla Public License 2.0**, which adds a **Consensual Use Restriction** clause explicitly prohibiting use of the tool for non-consensual, adversarial forensics. It is designed exclusively for individuals or organizations examining a device they own or have explicit authorization to examine — not for surveillance of third parties.
+MVT's design centers on **one core decision**: keep the detection engine completely ignorant of *which platform* it's analyzing, and push all platform-specific knowledge into small, disposable modules.
 
-Public IOC feeds alone are **not sufficient** to certify a device as "clean." A negative result only means no *known* indicator was matched — it does not rule out compromise by an undocumented or novel threat.
+- **Plugin pattern over monolith** — every artifact parser (SMS, WhatsApp, dumpsys battery, Safari history) is a subclass of the same `MVTModule` base class. This means Amnesty's team can add support for a brand-new artifact type by writing one small file — the engine, IOC matcher, and CLI never need to change. This matters enormously for a project maintained by a small non-profit team that has to keep pace with constantly-changing phone OS internals.
 
----
+- **Aho-Corasick for IOC matching** — with thousands of published indicators and potentially millions of extracted strings per scan, naive substring search would be far too slow. Building the indicator list into a single automaton once, then scanning each string in one pass, keeps scan time proportional to the data size — not the indicator list size. This was the correct algorithmic choice given the scale threat-intel feeds operate at.
 
-## Limitations & Roadmap
+- **Read-only, no-exploit design** — MVT deliberately never requires root, jailbreak, or any exploit to function. This is not a technical limitation but an intentional architectural boundary: it's what makes the tool legally distributable, safe for civil-society use, and auditable, at the cost of reduced visibility on non-jailbroken iOS devices.
 
-| Limitation | Notes | Suggested direction |
-|---|---|---|
-| Signature-based detection only | Cannot detect spyware with no published IOC | Add an optional statistical/anomaly-scoring layer as a supplement, not a replacement |
-| No live/runtime scanning | Fully offline, post-hoc analysis | Out of scope by design — intentional for safety and auditability |
-| iOS visibility gap | Full filesystem access needs jailbreak/forensic extraction tools | Continue expanding `mixed/` and `sysdiagnose` coverage, which need no jailbreak |
-| Parser fragility | OS updates can silently change database schemas MVT depends on | Add schema-version detection and graceful degradation per parser |
-| Pure-Python hot paths | Large dataset parsing can be slow outside the C-backed IOC matcher | Selectively port hot loops to Rust via `pyo3` bindings |
+- **Python orchestration + native hot paths** — the application layer is pure Python for readability and auditability (critical for a human-rights tool where trust matters as much as function), while the one performance-critical component (IOC matching) is offloaded to a C extension. This is a deliberate "readable where it matters, fast where it matters" trade-off rather than a full native rewrite.
 
----
-
-## Contributing
-
-This repository section documents review findings and is maintained for project evaluation purposes. For contributions to the actual MVT project, refer to the upstream repository's `CONTRIBUTING.md` at [github.com/mvt-project/mvt](https://github.com/mvt-project/mvt).
-
----
-
-## License
-
-MVT is distributed under a modified Mozilla Public License 2.0 with a Consensual Use Restriction clause. See the upstream project's `LICENSE` file for full terms.
-
-<div align="center">
-
-_Reviewed and documented as part of an academic mobile forensics project evaluation._
-
-</div>
+- **STIX2 as the indicator format** — rather than inventing a proprietary indicator format, MVT consumes the same STIX2 feeds published by the wider threat-intelligence community, so it benefits from research done outside the project entirely.
